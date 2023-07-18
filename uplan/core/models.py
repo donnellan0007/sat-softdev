@@ -7,7 +7,6 @@ class Profile(models.Model):
     given_name = models.CharField(max_length=256, blank=True, null=True)
     family_name = models.CharField(max_length=256, blank=True, null=True)
     is_admin = models.BooleanField(default=False)
-    lesson_plans = models.ManyToManyField("LessonPlan", related_name="lesson_plan", blank=True)
 
     def __str__(self):
         return f"{self.given_name} {self.family_name}"
@@ -18,7 +17,7 @@ class Profile(models.Model):
         pass
 
 class LessonPlan(models.Model):
-    primary_teacher = models.ForeignKey(Profile, blank=True, null=True, on_delete=models.SET_NULL, related_name="teacher")
+    primary_teacher = models.ForeignKey(Profile, blank=True, null=True, on_delete=models.SET_NULL, related_name="lessons")
     associated_teachers = models.ManyToManyField(Profile, related_name="associated_teachers", blank=True)
     subject = models.OneToOneField("Subject", on_delete=models.SET_NULL, blank=True, null=True)
     title = models.CharField(max_length=256, null=True, blank=True)
