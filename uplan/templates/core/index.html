@@ -5,5 +5,26 @@
 </head>
 <body>
 <h1>u●plan</h1>
+
+<ul>
+{% comment %}
+{% for lesson in lessons %}
+    <li><a href="{{ lesson.get_absolute_url }}">{{ lesson.title }}</a></li>
+
+{% empty %}
+        <p>Nothing</p>
+{% endfor %}
+{% endcomment %}
+
+{% for subject in subjects %}
+    <b>{{ subject.name }}</b>
+    <hr>
+    {% for lesson in subject.lesson_plan.all %}
+        <li><a href="{{ lesson.get_absolute_url }}">{{ lesson.title }}</a></li>
+    {% endfor %}
+    <hr>
+{% endfor %}
+
+</ul>
 </body>
 </html>

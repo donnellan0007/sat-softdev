@@ -1,0 +1,21 @@
+{% load static %}
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="{% static '/css/index.css/' %}">
+</head>
+<body>
+<div>
+    <small><a href="{% url "core:index" %}">🡐 View all lesson plans</a></small>
+    <h2>{{ lesson.title }}</h2>
+    {% for subject in lesson.subject.all %}
+    <mark>{{ subject.name }}</mark> /
+    {% endfor %}
+    <small>{{ lesson.lesson_date }}</small>
+</div>
+<hr>
+
+<div>
+    {{ lesson.text_content|safe|linebreaksbr }}
+</div>
+</body>
+</html>

@@ -1,8 +1,23 @@
 from django.shortcuts import render, redirect
 from .forms import LessonPlanForm
+from .models import Profile, LessonPlan, Subject
 # Create your views here.
 def index(request):
-    return render(request, 'core/index.html')
+    cur_user = request.user.profile
+    user_subjects = cur_user.subjects.all()
+    lesson_plans = cur_user.lessons.all()
+    context = {
+        'subjects': user_subjects,
+        'lessons': lesson_plans
+    }
+    return render(request, 'core/index.html', context)
+
+def lesson_view(request, slug):
+    lesson = LessonPlan.objects.get(slug=slug)
+    context = {
+        'lesson': lesson
+    }
+    return render(request, 'core/lesson_view.html', context)
 
 def create_lesson(request):
     if request.method == 'POST':
