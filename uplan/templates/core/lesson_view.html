@@ -10,7 +10,7 @@
     {% for subject in lesson.subject.all %}
     <mark>{{ subject.name }}</mark> /
     {% endfor %}
-    <small>{{ lesson.lesson_date }}</small>
+    <small>{{ lesson.lesson_date|date:"l dS F Y" }}</small>
 </div>
 <hr>
 

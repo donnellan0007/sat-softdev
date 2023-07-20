@@ -21,6 +21,8 @@
     <hr>
     {% for lesson in subject.lesson_plan.all %}
         <li><a href="{{ lesson.get_absolute_url }}">{{ lesson.title }}</a></li>
+        {% empty %}
+        <li><i>No plans for subject</i><a href="{% url "core:create_lesson" %}"><button>Add one</button></a></li>
     {% endfor %}
     <hr>
 {% endfor %}
