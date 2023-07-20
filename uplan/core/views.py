@@ -1,8 +1,26 @@
 from django.shortcuts import render, redirect
 from .forms import LessonPlanForm
+from .models import Profile, LessonPlan, Subject
+import io
+from django.http import FileResponse
+from reportlab.pdfgen import canvas
 # Create your views here.
 def index(request):
-    return render(request, 'core/index.html')
+    cur_user = request.user.profile
+    user_subjects = cur_user.subjects.all()
+    lesson_plans = cur_user.lessons.all()
+    context = {
+        'subjects': user_subjects,
+        'lessons': lesson_plans
+    }
+    return render(request, 'core/index.html', context)
+
+def lesson_view(request, slug):
+    lesson = LessonPlan.objects.get(slug=slug)
+    context = {
+        'lesson': lesson
+    }
+    return render(request, 'core/lesson_view.html', context)
 
 def create_lesson(request):
     if request.method == 'POST':
@@ -11,6 +29,7 @@ def create_lesson(request):
             obj = form.save(commit=False)
             obj.primary_teacher = request.user.profile
             obj.save()
+            form.save_m2m()
             return redirect('core:index')
     else:
         form = LessonPlanForm()
