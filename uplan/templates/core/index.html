@@ -1,12 +1,9 @@
+{% extends 'core/base.html' %}
 {% load static %}
-<html>
-<head>
-<link rel="stylesheet" type="text/css" href="{% static '/css/index.css/' %}">
-</head>
-<body>
-<h1>u●plan</h1>
+{% block content %}
+{#<h1>u●plan</h1>#}
 
-<ul>
+
 {% comment %}
 {% for lesson in lessons %}
     <li><a href="{{ lesson.get_absolute_url }}">{{ lesson.title }}</a></li>
@@ -15,18 +12,42 @@
         <p>Nothing</p>
 {% endfor %}
 {% endcomment %}
-
-{% for subject in subjects %}
-    <b>{{ subject.name }}</b>
-    <hr>
-    {% for lesson in subject.lesson_plan.all %}
-        <li><a href="{{ lesson.get_absolute_url }}">{{ lesson.title }}</a></li>
-        {% empty %}
-        <li><i>No plans for subject</i><a href="{% url "core:create_lesson" %}"><button>Add one</button></a></li>
+<div class="container">
+    <div class="title-container">
+        <div class="title-title-search">
+            <h1>Lessons</h1>
+            <form style="display: flex; gap: 5px;" method="get" action="{% url 'core:search_results' %}">
+                <input type="search" name="q" id="q" placeholder="Search">
+                <div class="date-range-group">
+                    <input type="date" name="ds" id="" value="{{ date_start }}">
+                    <input type="date" name="de" id="" value="{{ date_end }}">
+                </div>
+            </form>
+        </div>
+        <div class="button-group">
+            <button class="btn btn__primary"><a href="{% url 'core:create_lesson' %}">Create Lesson</a></button>
+        </div>
+    </div>
+    {% if subjects %}
+    <div class="subjects">
+    {% for subject in subjects %}
+        <div class="subject-container">
+                <div class="subject-name">
+                <h4 style="color: {{ subject.primary_colour }}">{{ subject.name }}</h4>
+                </div>
+                <div class="lesson-plan">
+                {% for lesson in subject.lesson_plan.all %}
+                    <li><a href="{{ lesson.get_absolute_url }}">{{ lesson.title }}</a></li>
+                    {% empty %}
+                    <button style="width: 100%;" class="btn btn__secondary"><a href="{% url 'core:create_lesson' %}">Create lesson plan</a></button>
+                {% endfor %}
+                </div>
+        </div>
     {% endfor %}
-    <hr>
-{% endfor %}
+    </div>
+        {% else %}
+        <h3>No subjects</h3>
+    {% endif %}
+</div>
 
-</ul>
-</body>
-</html>
+{% endblock content %}

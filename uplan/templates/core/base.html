@@ -1,0 +1,40 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="stylesheet" type="text/css" href="{% static '/css/index.css/' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="container">
+<div class="navbar">
+    <header>
+        <a href="{% url 'core:index' %}"><img src="{% static 'images/logo.svg' %}" alt=""></a>
+        <a href="{% url "core:index" %}">Lessons</a>
+        <a class="negative" href="{% url 'logout' %}">Logout</a>
+    </header>
+    <div class="navbar-element">
+        <div class="profile-nav-wrap pill pill__outline pill__sml">
+            {% if request.user.profile.is_admin %}
+            <span><b>Admin</b></span>
+            {% endif %}
+            <span>{{ request.user.profile.full_name }}</span>
+        </div>
+    </div>
+</div>
+</div>
+
+{% block content %}
+
+{% endblock %}
+<script>
+      feather.replace()
+</script>
+</body>
+</html>

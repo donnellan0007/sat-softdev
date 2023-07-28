@@ -4,12 +4,19 @@ from django.urls import reverse
 from django.utils.text import slugify
 import uuid
 
+from .validators import validate_existence
+
+
 # Create your models here.
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, blank=True, null=True)
     given_name = models.CharField(max_length=256, blank=True, null=True)
     family_name = models.CharField(max_length=256, blank=True, null=True)
     is_admin = models.BooleanField(default=False)
+
+    @property
+    def full_name(self):
+        return f"{self.given_name} {self.family_name}"
 
     def __str__(self):
         return f"{self.given_name} {self.family_name}"
@@ -23,8 +30,8 @@ class LessonPlan(models.Model):
     primary_teacher = models.ForeignKey(Profile, blank=True, null=True, on_delete=models.SET_NULL, related_name="lessons")
     associated_teachers = models.ManyToManyField(Profile, related_name="associated_teachers", blank=True)
     subject = models.ManyToManyField("Subject", blank=True, related_name='lesson_plan')
-    title = models.CharField(max_length=256, null=True, blank=True)
-    text_content = models.TextField(blank=True, null=True)
+    title = models.CharField(max_length=256, null=True, blank=True, validators=[validate_existence])
+    text_content = models.TextField(blank=False, null=False, validators=[validate_existence])
     date_created = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     lesson_date = models.DateField(blank=True, null=True)
     slug = models.SlugField(

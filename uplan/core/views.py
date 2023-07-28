@@ -1,10 +1,19 @@
+from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from django.shortcuts import render, redirect
+from django.views.generic import UpdateView
+
 from .forms import LessonPlanForm
 from .models import Profile, LessonPlan, Subject
 import io
+# Import PDF Stuff
 from django.http import FileResponse
+import io
 from reportlab.pdfgen import canvas
+from reportlab.lib.units import inch
+from reportlab.lib.pagesizes import letter
 # Create your views here.
+@login_required
 def index(request):
     cur_user = request.user.profile
     user_subjects = cur_user.subjects.all()
@@ -15,6 +24,35 @@ def index(request):
     }
     return render(request, 'core/index.html', context)
 
+def search(request):
+    cur_user = request.user.profile
+    user_subjects = cur_user.subjects.all()
+    lesson_plans = cur_user.lessons.all()
+    if request.GET:
+        query = request.GET.get("q")
+        date_start = request.GET.get("ds")
+        date_end = request.GET.get("de")
+        print(date_start, date_end)
+        if date_start and date_end:
+            searches = LessonPlan.objects.filter(
+                Q(title__icontains=query) & Q(subject__teacher=cur_user) & Q(lesson_date__range=[date_start, date_end])
+            ).order_by("-lesson_date")
+        else:
+            searches = LessonPlan.objects.filter(
+                Q(title__icontains=query) & Q(subject__teacher=cur_user)
+            )
+
+        context = {
+            'results': searches,
+            'query': query,
+            'date_start': date_start,
+            'date_end': date_end,
+            'subjects': user_subjects,
+            'lessons': lesson_plans
+        }
+    else:
+        context = {}
+    return render(request, 'core/search_results.html', context)
 def lesson_view(request, slug):
     lesson = LessonPlan.objects.get(slug=slug)
     context = {
@@ -34,3 +72,44 @@ def create_lesson(request):
     else:
         form = LessonPlanForm()
     return render(request, 'core/create_lesson.html', {'form':form})
+
+
+from textwrap import wrap
+
+def create_pdf(request, slug):
+    # Create Bytestream buffer
+    buf = io.BytesIO()
+    # Create a canvas
+    c = canvas.Canvas(buf, pagesize=letter, bottomup=0)
+    # Create a text object
+    textob = c.beginText()
+    textob.setTextOrigin(inch, inch)
+    textob.setFont("Helvetica", 10)
+    lesson = LessonPlan.objects.get(slug=slug)
+    file_name = f"{lesson.title} - {lesson.lesson_date}.pdf"
+    lines = []
+
+    wrapped_text = "\n".join(wrap(lesson.text_content, 100))  # 80 is line width
+    lines.append(f"{lesson.title} - {lesson.lesson_date}")
+    lines.append("\n")
+    lines.append("-------")
+    lines.append("\n")
+    lines.append(wrapped_text)
+    lines.append("\n")
+
+    # Loop
+    for line in lines:
+        textob.textLines(line)
+
+    # Finish Up
+    c.drawText(textob)
+    c.showPage()
+    c.save()
+    buf.seek(0)
+
+    # Return something
+    return FileResponse(buf, as_attachment=True, filename=file_name)
+class UpdateLesson(UpdateView):
+    model = LessonPlan
+    fields = ['title', 'subject', 'text_content', 'lesson_date']
+    template_name_suffix = '_update_form'

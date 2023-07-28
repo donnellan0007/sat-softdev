@@ -1,21 +1,32 @@
+{% extends 'core/base.html' %}
 {% load static %}
-<html>
-<head>
-<link rel="stylesheet" type="text/css" href="{% static '/css/index.css/' %}">
-</head>
-<body>
-<div>
-    <small><a href="{% url "core:index" %}">🡐 View all lesson plans</a></small>
-    <h2>{{ lesson.title }}</h2>
-    {% for subject in lesson.subject.all %}
-    <mark>{{ subject.name }}</mark> /
-    {% endfor %}
-    <small>{{ lesson.lesson_date|date:"l dS F Y" }}</small>
-</div>
-<hr>
 
-<div>
+{% block content %}
+<div class="container">
+<div class="lesson-plan-detail">
+    <small><a href="{% url "core:index" %}">🡐 View all lesson plans</a></small>
+    <div class="lesson-plan-detail-head">
+    <h2>{{ lesson.title }}</h2>
+    <div class="date-group">
+        {% if lesson.lesson_date %}
+            <i data-feather="calendar"></i>
+            <p>{{ lesson.lesson_date|date:"l dS F Y" }}</p>
+        {% else %}
+            <p>No date set</p>
+        {% endif %}
+    </div>
+    {% for subject in lesson.subject.all %}
+    <p style="background: {{ subject.primary_colour }};" class="pill pill__sml">{{ subject.name }}</p>
+    {% endfor %}
+    </div>
+</div>
+
+<div class="lesson-plan-content-detail">
+    <button class="btn btn__secondary"><a href="{% url 'core:create_pdf' lesson.slug %}">Generate PDF</a></button>
+    <button class="btn btn__secondary"><a href="{% url 'core:update_lesson' lesson.slug %}">Edit Lesson</a></button>
+    <br>
     {{ lesson.text_content|safe|linebreaksbr }}
 </div>
-</body>
-</html>
+</div>
+
+{% endblock content %}

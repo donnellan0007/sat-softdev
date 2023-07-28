@@ -1,0 +1,35 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% load core_extras %}
+
+{% block content %}
+    <div class="container">
+    <div class="search-heading">
+
+        <form class="form-grp" method="get" action="{% url 'core:search_results' %}">
+            <input type="search" name="q" id="" placeholder="{{ query }}">
+            <div class="date-range-group">
+                <input type="date" name="ds" id="" value="{{ date_start }}">
+                <input type="date" name="de" id="" value="{{ date_end }}">
+            </div>
+            <input class="btn btn__primary" style="cursor: pointer; padding: 5px 10px;" type="submit" value="Filter">
+        </form>
+    </div>
+    <div class="search-container">
+    {% for result in results %}
+        <a href="{{ result.get_absolute_url }}">
+        <div class="search-box">
+            <p>{{ result.title|highlight_search:query }}</p>
+            <div class="search-date-cont">
+                {% if result.lesson_date %}
+                <span style="" class="pill pill__sml pill__blue">{{ result.lesson_date }}</span>
+                {% else %}
+                <span style="opacity: 65%;" class="pill pill__sml pill__blue">No date</span>
+                {% endif %}
+            </div>
+        </div>
+        </a>
+    {% endfor %}
+    </div>
+    </div>
+{% endblock content %}
