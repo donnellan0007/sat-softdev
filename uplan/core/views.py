@@ -13,7 +13,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
 from reportlab.lib.pagesizes import letter
 # Create your views here.
-@login_required
+@login_required # ensures only logged in users can view the page
 def index(request):
     cur_user = request.user.profile
     user_subjects = cur_user.subjects.all()
@@ -29,6 +29,10 @@ def search(request):
     user_subjects = cur_user.subjects.all()
     lesson_plans = cur_user.lessons.all()
     if request.GET:
+        """
+        The following gets the data sent from the form
+        The data is retrieved through the "name" in the HTML
+        """
         query = request.GET.get("q")
         date_start = request.GET.get("ds")
         date_end = request.GET.get("de")
@@ -38,6 +42,12 @@ def search(request):
                 Q(title__icontains=query) & Q(subject__teacher=cur_user) & Q(lesson_date__range=[date_start, date_end])
             ).order_by("-lesson_date")
         else:
+            """
+            Filtering the lesson plans where the title
+            matches/contains the title
+            Ensures only the current teacher's
+            lessons are retrieved
+            """
             searches = LessonPlan.objects.filter(
                 Q(title__icontains=query) & Q(subject__teacher=cur_user)
             )
@@ -54,6 +64,8 @@ def search(request):
         context = {}
     return render(request, 'core/search_results.html', context)
 def lesson_view(request, slug):
+    # in the urls.py file, the slug is used to
+    #get the lesson plan itself
     lesson = LessonPlan.objects.get(slug=slug)
     context = {
         'lesson': lesson
@@ -64,6 +76,10 @@ def create_lesson(request):
     if request.method == 'POST':
         form = LessonPlanForm(request.POST)
         if form.is_valid():
+            """ 
+            we set commit=False due to the way in which the
+            database and Django handles manytomany relations
+            """
             obj = form.save(commit=False)
             obj.primary_teacher = request.user.profile
             obj.save()
@@ -77,11 +93,8 @@ def create_lesson(request):
 from textwrap import wrap
 
 def create_pdf(request, slug):
-    # Create Bytestream buffer
     buf = io.BytesIO()
-    # Create a canvas
     c = canvas.Canvas(buf, pagesize=letter, bottomup=0)
-    # Create a text object
     textob = c.beginText()
     textob.setTextOrigin(inch, inch)
     textob.setFont("Helvetica", 10)
